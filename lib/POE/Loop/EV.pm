@@ -1,0 +1,389 @@
+package POE::Loop::EV;
+
+# EV.pm (libev) event loop bridge
+# $Id: EV.pm 12 2007-11-16 19:36:25Z andyg $
+
+use strict;
+
+our $VERSION = '0.01';
+
+# Everything plugs into POE::Kernel.
+package # hide me from PAUSE
+    POE::Kernel;
+
+use strict;
+
+use EV;
+use POE::Kernel;
+
+# Loop debugging
+sub EV_DEBUG () { $ENV{POE_EV_DEBUG} || 0 }
+
+# Global EV timer object
+my $_watcher_timer;
+
+# Global SIGCHLD watcher
+my $_child_watcher;
+
+# Global list of EV signal objects
+my %signal_events;
+
+# Global list of EV filehandle objects, indexed by fd number
+my @fileno_watcher;
+
+my $DIE_MESSAGE;
+
+############################################################################
+# Initialization, Finalization, and the Loop itself
+############################################################################
+
+sub loop_initialize {
+    my $self = shift;
+    
+    if ( EV_DEBUG ) {
+        my $methods = {
+            EV::METHOD_SELECT  => 'select',
+            EV::METHOD_POLL    => 'poll',
+            EV::METHOD_EPOLL   => 'epoll',
+            EV::METHOD_KQUEUE  => 'kqueue',
+            EV::METHOD_DEVPOLL => 'devpoll',
+            EV::METHOD_PORT    => 'port',
+        };
+        
+        warn "loop_initialize, EV is using method: " . $methods->{ EV::method() } . "\n";
+    }
+
+    # Set up the global timer object
+    $_watcher_timer = EV::periodic_ns( 0, 0, 0, \&_loop_timer_callback );
+    
+    # Set up the callback for SIGCHLD
+    $_child_watcher = EV::child( 0, \&_child_callback );
+    
+    $EV::DIED = \&_die_handler;
+}
+
+# Timer callback to dispatch events.
+my $last_time = time();
+sub _loop_timer_callback {
+    my $self = $poe_kernel;
+    
+    EV_DEBUG && warn "_loop_timer_callback, at " . time() . "\n";
+
+    if (TRACE_STATISTICS) {
+        $self->_data_stat_add('idle_seconds', time() - $last_time);
+    }
+
+    $self->_data_ev_dispatch_due();
+    $self->_test_if_kernel_is_idle();
+
+    # Transferring control back to EV; this is idle time.
+    $last_time = time() if TRACE_STATISTICS;
+}
+
+sub loop_finalize {
+    my $self = shift;
+    
+    foreach my $fd ( 0 .. $#fileno_watcher ) {
+        next unless defined $fileno_watcher[ $fd ];
+        foreach my $mode ( EV::READ, EV::WRITE ) {
+            if ( defined $fileno_watcher[ $fd ]->[ $mode ] ) {
+                POE::Kernel::_warn(
+                    "Mode $mode watcher for fileno $fd is defined during loop finalize"
+                );
+            }
+        }
+    }
+    
+    $self->loop_ignore_all_signals();
+}
+
+sub loop_attach_uidestroy {
+    # does nothing, no UI
+}
+
+sub loop_do_timeslice {
+    # does nothing
+}
+
+sub loop_run {
+    EV_DEBUG && warn "loop_run\n";
+    
+    EV::loop();
+    
+    if ( defined $DIE_MESSAGE ) {
+        my $message = $DIE_MESSAGE;
+        undef $DIE_MESSAGE;
+        die $message;
+    }
+}
+
+sub loop_halt {
+    EV_DEBUG && warn "loop_halt\n";
+    
+    $_watcher_timer->stop();
+    undef $_watcher_timer;
+    
+    EV::unloop();
+}
+
+sub _die_handler {
+    EV_DEBUG && warn "_die_handler( $@ )\n";
+    
+    # EV doesn't let you rethrow an error here, so we have
+    # to stop the loop and get the error later
+    $DIE_MESSAGE = $@;
+    
+    loop_finalize();
+    loop_halt();
+}
+
+############################################################################
+# Signal Handling
+############################################################################
+
+sub loop_watch_signal {
+    my ( $self, $signame ) = @_;
+    
+    # Child process has stopped.
+    # XXX: libev always sets a SIGCHLD handler
+    if ( $signame eq 'CHLD' or $signame eq 'CLD' ) {
+        $_child_watcher->start();
+        
+        return;
+    }
+    
+    EV_DEBUG && warn "loop_watch_signal( $signame )\n";
+    
+    $signal_events{ $signame } ||= EV::signal(
+        $signame,
+        sub {
+            if ( TRACE_SIGNALS ) {
+                my $pipelike = $signame eq 'PIPE' ? 'PIPE-like' : 'generic';
+                POE::Kernel::_warn "<sg> Enqueuing $pipelike SIG$signame event";
+            }
+            
+            EV_DEBUG && warn "_loop_signal_callback( $signame )\n";
+            
+            $poe_kernel->_data_ev_enqueue(
+                $poe_kernel, $poe_kernel, EN_SIGNAL, ET_SIGNAL, [ $signame ],
+                __FILE__, __LINE__, undef, time()
+            );
+        },
+    );
+}
+
+sub loop_ignore_signal {
+    my ( $self, $signame ) = @_;
+
+    if ( $signame eq 'CHLD' or $signame eq 'CLD' ) {
+        if ( $_child_watcher ) {
+            $_child_watcher->stop();
+        }
+        
+        return;
+    }
+
+    if ( defined $signal_events{ $signame } ) {
+        $signal_events{ $signame }->stop();
+    }
+}
+
+sub loop_ignore_all_signals {
+    my $self = shift;
+
+    map { $_->stop() if defined $_ } values %signal_events;
+    
+    %signal_events = ();
+    
+    if ( $_child_watcher ) {
+        $_child_watcher->stop();
+    }
+}
+
+sub _child_callback {
+    my $w = shift;
+    
+    my $pid    = $w->rpid;
+    my $status = $w->rstatus;
+    
+    EV_DEBUG && warn "_child_callback( $pid, $status )\n";
+    
+    if ( TRACE_SIGNALS ) {
+        POE::Kernel::_warn("<sg> POE::Kernel detected SIGCHLD (pid=$pid; exit=$status)");
+    }
+    
+    # Check for explicit SIGCHLD watchers, and enqueue explicit
+    # events for them.
+    if ( exists $poe_kernel->[KR_PIDS]->{$pid} ) {
+        my @sessions_to_clear;
+        while ( my ($ses_key, $ses_rec) = each %{ $poe_kernel->[KR_PIDS]->{$pid} } ) {
+            $poe_kernel->_data_ev_enqueue(
+                $ses_rec->[0], $poe_kernel, $ses_rec->[1], ET_SIGCLD,
+                [ 'CHLD', $pid, $status ],
+                __FILE__, __LINE__, undef, time(),
+            );
+            push @sessions_to_clear, $ses_rec->[0];
+        }
+        $poe_kernel->_data_sig_pid_ignore($_, $pid) foreach @sessions_to_clear;
+    }
+    
+    $poe_kernel->_data_ev_enqueue(
+        $poe_kernel, $poe_kernel, EN_SIGNAL, ET_SIGNAL,
+        [ 'CHLD', $pid, $status ],
+        __FILE__, __LINE__, undef, time()
+    );
+}
+
+############################################################################
+# Timer code
+############################################################################
+
+sub loop_resume_time_watcher {
+    my ( $self, $next_time ) = @_;
+    ( $_watcher_timer and $next_time ) or return;
+    
+    EV_DEBUG && warn "loop_resume_time_watcher( $next_time, in " . ( $next_time - time() ) . " )\n";
+
+    $_watcher_timer->set($next_time);
+    $_watcher_timer->start();
+}
+
+sub loop_reset_time_watcher {
+    my ( $self, $next_time ) = @_;
+    ( $_watcher_timer and $next_time ) or return;
+    
+    EV_DEBUG && warn "loop_reset_time_watcher( $next_time, in " . ( $next_time - time() ) . " )\n";
+    
+    $_watcher_timer->set($next_time);
+    $_watcher_timer->start();
+}
+
+sub loop_pause_time_watcher {
+    $_watcher_timer or return;
+    
+    EV_DEBUG && warn "loop_pause_time_watcher()\n";
+    
+    $_watcher_timer->stop();
+}
+
+############################################################################
+# Filehandle code
+############################################################################
+
+# helper function, not a method
+sub _mode_to_ev {
+    return EV::READ  if $_[0] == MODE_RD;
+    return EV::WRITE if $_[0] == MODE_WR;
+
+    confess "POE::Loop::EV does not support MODE_EX"
+        if $_[0] == MODE_EX;
+
+    confess "Unknown mode $_[0]";
+}
+
+sub loop_watch_filehandle {
+    my ( $self, $handle, $mode ) = @_;
+
+    my $fileno  = fileno($handle);
+    my $ev_mode = _mode_to_ev($mode);
+    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+
+    if ( defined $watcher ) {
+        $watcher->stop();
+        undef $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    }
+
+    $fileno_watcher[ $fileno ]->[ $ev_mode ] = EV::io(
+        $fileno,
+        $ev_mode,
+        \&_loop_filehandle_callback,
+    );
+}
+
+sub loop_ignore_filehandle {
+    my ( $self, $handle, $mode ) = @_;
+
+    my $fileno  = fileno($handle);
+    my $ev_mode = _mode_to_ev($mode);
+    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+
+    return if !defined $watcher;
+
+    $watcher->stop();
+    
+    undef $fileno_watcher[ $fileno ]->[ $ev_mode ];
+}
+
+sub loop_pause_filehandle {
+    my ( $self, $handle, $mode ) = @_;
+
+    my $fileno  = fileno($handle);
+    my $ev_mode = _mode_to_ev($mode);
+    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+
+    $watcher->stop();
+}
+
+sub loop_resume_filehandle {
+    my ( $self, $handle, $mode ) = @_;
+
+    my $fileno  = fileno($handle);
+    my $ev_mode = _mode_to_ev($mode);
+    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+
+    $watcher->start();
+}
+
+sub _loop_filehandle_callback {
+    my ( $watcher, $ev_mode ) = @_;
+    
+    EV_DEBUG && warn "_loop_filehandle_callback( " . $watcher->fh . ", $ev_mode )\n";
+
+    my $mode = ( $ev_mode & EV::READ )
+        ? MODE_RD
+        : ( $ev_mode & EV::WRITE )
+            ? MODE_WR
+            : confess "Invalid mode occured in POE::Loop::EV: $ev_mode";
+
+    # ->fh is actually the fileno, since that's what we called EV::io with
+    $poe_kernel->_data_handle_enqueue_ready( $mode, $watcher->fh );
+    
+    $poe_kernel->_test_if_kernel_is_idle();
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+POE::Loop::EV - a bridge that supports EV from POE
+
+=head1 SYNOPSIS
+
+See L<POE::Loop>.
+
+=head1 DESCRIPTION
+
+This class is an implementation of the abstract POE::Loop interface.
+It follows POE::Loop's public interface exactly.  Therefore, please
+see L<POE::Loop> for its documentation.
+
+=head1 SEE ALSO
+
+L<POE>, L<POE::Loop>, L<EV>
+
+=head1 AUTHOR
+
+Andy Grundman <andy@hybridized.org>
+
+=head1 THANKS
+
+Brandon Black, for his L<POE::Loop::Event_Lib> module.
+
+=head1 LICENSE
+
+POE::Loop::EV is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
