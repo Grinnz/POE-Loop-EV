@@ -1,11 +1,11 @@
 package POE::Loop::EV;
 
 # EV.pm (libev) event loop bridge
-# $Id: EV.pm 12 2007-11-16 19:36:25Z andyg $
+# $Id: EV.pm 13 2007-11-20 00:20:27Z andyg $
 
 use strict;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE

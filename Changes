@@ -1,0 +1,7 @@
+# This file documents the revision history for Perl extension POE::Loop::EV.
+
+0.02    2007-11-19 19:30:00
+        - Make the test suite run for each backend loop compiled into EV.
+
+0.01    2007-11-16 17:36:00
+        - Initial release.
