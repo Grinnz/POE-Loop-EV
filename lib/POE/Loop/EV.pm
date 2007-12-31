@@ -1,11 +1,11 @@
 package POE::Loop::EV;
 
 # EV.pm (libev) event loop bridge
-# $Id: EV.pm 13 2007-11-20 00:20:27Z andyg $
+# $Id: EV.pm 22 2007-11-28 00:03:09Z andyg $
 
 use strict;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
@@ -42,15 +42,15 @@ sub loop_initialize {
     
     if ( EV_DEBUG ) {
         my $methods = {
-            EV::METHOD_SELECT  => 'select',
-            EV::METHOD_POLL    => 'poll',
-            EV::METHOD_EPOLL   => 'epoll',
-            EV::METHOD_KQUEUE  => 'kqueue',
-            EV::METHOD_DEVPOLL => 'devpoll',
-            EV::METHOD_PORT    => 'port',
+            EV::BACKEND_SELECT()  => 'select',
+            EV::BACKEND_POLL()    => 'poll',
+            EV::BACKEND_EPOLL()   => 'epoll',
+            EV::BACKEND_KQUEUE()  => 'kqueue',
+            EV::BACKEND_DEVPOLL() => 'devpoll',
+            EV::BACKEND_PORT()    => 'port',
         };
         
-        warn "loop_initialize, EV is using method: " . $methods->{ EV::method() } . "\n";
+        warn "loop_initialize, EV is using method: " . $methods->{ EV::backend() } . "\n";
     }
 
     # Set up the global timer object
@@ -81,7 +81,7 @@ sub _loop_timer_callback {
 }
 
 sub loop_finalize {
-    my $self = shift;
+    EV_DEBUG && warn "loop_finalize\n";
     
     foreach my $fd ( 0 .. $#fileno_watcher ) {
         next unless defined $fileno_watcher[ $fd ];
@@ -94,7 +94,7 @@ sub loop_finalize {
         }
     }
     
-    $self->loop_ignore_all_signals();
+    loop_ignore_all_signals();
 }
 
 sub loop_attach_uidestroy {
@@ -292,6 +292,8 @@ sub loop_watch_filehandle {
         $watcher->stop();
         undef $fileno_watcher[ $fileno ]->[ $ev_mode ];
     }
+    
+    EV_DEBUG && warn "loop_watch_filehandle( $handle ($fileno), $mode )\n";
 
     $fileno_watcher[ $fileno ]->[ $ev_mode ] = EV::io(
         $fileno,
@@ -308,6 +310,8 @@ sub loop_ignore_filehandle {
     my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
 
     return if !defined $watcher;
+    
+    EV_DEBUG && warn "loop_ignore_filehandle( $handle ($fileno), $mode )\n";
 
     $watcher->stop();
     
@@ -320,6 +324,8 @@ sub loop_pause_filehandle {
     my $fileno  = fileno($handle);
     my $ev_mode = _mode_to_ev($mode);
     my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    
+    EV_DEBUG && warn "loop_pause_filehandle( $handle ($fileno), $mode )\n";
 
     $watcher->stop();
 }
@@ -330,6 +336,8 @@ sub loop_resume_filehandle {
     my $fileno  = fileno($handle);
     my $ev_mode = _mode_to_ev($mode);
     my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    
+    EV_DEBUG && warn "loop_resume_filehandle( $handle ($fileno), $mode )\n";
 
     $watcher->start();
 }
@@ -339,11 +347,11 @@ sub _loop_filehandle_callback {
     
     EV_DEBUG && warn "_loop_filehandle_callback( " . $watcher->fh . ", $ev_mode )\n";
 
-    my $mode = ( $ev_mode & EV::READ )
+    my $mode = ( $ev_mode == EV::READ )
         ? MODE_RD
-        : ( $ev_mode & EV::WRITE )
+        : ( $ev_mode == EV::WRITE )
             ? MODE_WR
-            : confess "Invalid mode occured in POE::Loop::EV: $ev_mode";
+            : confess "Invalid mode occured in POE::Loop::EV IO callback: $ev_mode";
 
     # ->fh is actually the fileno, since that's what we called EV::io with
     $poe_kernel->_data_handle_enqueue_ready( $mode, $watcher->fh );

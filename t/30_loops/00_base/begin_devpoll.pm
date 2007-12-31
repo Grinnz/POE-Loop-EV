@@ -1,6 +1,6 @@
-$ENV{LIBEV_FLAGS} = 10;
+$ENV{LIBEV_FLAGS} = 16;
 eval 'use EV';
-if ($@) {
+if ( $@ || EV::backend() != 16 ) {
   $| = 1;
   print qq(1..0 # Skip EV was not built with a devpoll backend\n);
   CORE::exit(0);

@@ -5,7 +5,7 @@ all_from 'lib/POE/Loop/EV.pm';
 
 requires 'Test::More' => '0.47';
 requires 'POE'        => '0.9999';
-requires 'EV'         => '1.0';
+requires 'EV'         => '2.01';
 
 ############# Copied from POE's Makefile.PL
 
