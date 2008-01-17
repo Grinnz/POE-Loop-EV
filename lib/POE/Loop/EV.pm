@@ -5,7 +5,7 @@ package POE::Loop::EV;
 
 use strict;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
@@ -133,8 +133,9 @@ sub _die_handler {
     # to stop the loop and get the error later
     $DIE_MESSAGE = $@;
     
-    loop_finalize();
-    loop_halt();
+    # This will cause the EV::loop call in loop_run to return,
+    # and cause the process to die.
+    EV::unloop();
 }
 
 ############################################################################
@@ -285,19 +286,18 @@ sub loop_watch_filehandle {
     my ( $self, $handle, $mode ) = @_;
 
     my $fileno  = fileno($handle);
-    my $ev_mode = _mode_to_ev($mode);
-    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    my $watcher = $fileno_watcher[ $fileno ]->[ $mode ];
 
     if ( defined $watcher ) {
         $watcher->stop();
-        undef $fileno_watcher[ $fileno ]->[ $ev_mode ];
+        undef $fileno_watcher[ $fileno ]->[ $mode ];
     }
     
     EV_DEBUG && warn "loop_watch_filehandle( $handle ($fileno), $mode )\n";
 
-    $fileno_watcher[ $fileno ]->[ $ev_mode ] = EV::io(
+    $fileno_watcher[ $fileno ]->[ $mode ] = EV::io(
         $fileno,
-        $ev_mode,
+        _mode_to_ev($mode),
         \&_loop_filehandle_callback,
     );
 }
@@ -306,8 +306,7 @@ sub loop_ignore_filehandle {
     my ( $self, $handle, $mode ) = @_;
 
     my $fileno  = fileno($handle);
-    my $ev_mode = _mode_to_ev($mode);
-    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    my $watcher = $fileno_watcher[ $fileno ]->[ $mode ];
 
     return if !defined $watcher;
     
@@ -315,31 +314,27 @@ sub loop_ignore_filehandle {
 
     $watcher->stop();
     
-    undef $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    undef $fileno_watcher[ $fileno ]->[ $mode ];
 }
 
 sub loop_pause_filehandle {
     my ( $self, $handle, $mode ) = @_;
 
-    my $fileno  = fileno($handle);
-    my $ev_mode = _mode_to_ev($mode);
-    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    my $fileno = fileno($handle);
+
+    $fileno_watcher[ $fileno ]->[ $mode ]->stop();
     
     EV_DEBUG && warn "loop_pause_filehandle( $handle ($fileno), $mode )\n";
-
-    $watcher->stop();
 }
 
 sub loop_resume_filehandle {
     my ( $self, $handle, $mode ) = @_;
 
-    my $fileno  = fileno($handle);
-    my $ev_mode = _mode_to_ev($mode);
-    my $watcher = $fileno_watcher[ $fileno ]->[ $ev_mode ];
+    my $fileno = fileno($handle);
+    
+    $fileno_watcher[ $fileno ]->[ $mode ]->start();
     
     EV_DEBUG && warn "loop_resume_filehandle( $handle ($fileno), $mode )\n";
-
-    $watcher->start();
 }
 
 sub _loop_filehandle_callback {
@@ -369,7 +364,12 @@ POE::Loop::EV - a bridge that supports EV from POE
 
 =head1 SYNOPSIS
 
-See L<POE::Loop>.
+    use EV;
+    use POE;
+    
+    ...
+    
+    POE::Kernel->run();
 
 =head1 DESCRIPTION
 

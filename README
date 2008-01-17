@@ -2,7 +2,12 @@ NAME
     POE::Loop::EV - a bridge that supports EV from POE
 
 SYNOPSIS
-    See POE::Loop.
+        use EV;
+        use POE;
+        
+    ...
+        
+    POE::Kernel->run();
 
 DESCRIPTION
     This class is an implementation of the abstract POE::Loop interface. It

@@ -1,5 +1,10 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
+0.04    2008-01-17 12:00:00
+        - Minor optimization to the way filehandle watchers are stored.
+        - Fixed die handler that was causing the test suite to hang on the
+          k_signals_rerun test.
+
 0.03    2007-12-30 23:40:00
         - Compat fixes for EV 2.01.
 

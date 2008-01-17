@@ -2,7 +2,7 @@
 abstract: a bridge that supports EV from POE
 author: Andy Grundman <andy@hybridized.org>
 distribution_type: module
-generated_by: Module::Install version 0.650
+generated_by: Module::Install version 0.65
 license: perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -15,10 +15,10 @@ no_index:
 provides: 
   POE::Loop::EV: 
     file: lib/POE/Loop/EV.pm
-    version: 0.03
+    version: 0.04
 requires: 
   EV: 2.01
   POE: 0.9999
   Test::More: 0.47
 tests: t/*.t t/*/*/*.t
-version: 0.03
+version: 0.04
