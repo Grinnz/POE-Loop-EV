@@ -156,6 +156,13 @@ sub part2 {
     $poe_kernel->post("test_dispatcher" => "run_next");
     return;
   }
+  elsif (exists $INC{'EV.pm'} && EV::backend() =~ /^[48]$/ ) {
+    SKIP: {
+      skip( "part2 doesn't work with EV epoll or kqueue backends", 13 );
+    }
+    $poe_kernel->post("test_dispatcher" => "run_next");
+    return;
+  }  
 
   POE::Session->create(
     inline_states => {

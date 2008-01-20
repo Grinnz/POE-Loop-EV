@@ -1,11 +1,11 @@
 package POE::Loop::EV;
 
 # EV.pm (libev) event loop bridge
-# $Id: EV.pm 22 2007-11-28 00:03:09Z andyg $
+# $Id: EV.pm 26 2008-01-20 16:21:48Z andyg $
 
 use strict;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
@@ -376,6 +376,12 @@ POE::Loop::EV - a bridge that supports EV from POE
 This class is an implementation of the abstract POE::Loop interface.
 It follows POE::Loop's public interface exactly.  Therefore, please
 see L<POE::Loop> for its documentation.
+
+=head1 CAVEATS
+
+Certain EV backends do not support polling on normal filehandles, namely
+epoll and kqueue.  You should avoid using regular filehandles with select_read,
+select_write, ReadWrite, etc.
 
 =head1 SEE ALSO
 

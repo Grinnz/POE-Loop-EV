@@ -14,6 +14,11 @@ DESCRIPTION
     follows POE::Loop's public interface exactly. Therefore, please see
     POE::Loop for its documentation.
 
+CAVEATS
+    Certain EV backends do not support polling on normal filehandles, namely
+    epoll and kqueue. You should avoid using regular filehandles with
+    select_read, select_write, ReadWrite, etc.
+
 SEE ALSO
     POE, POE::Loop, EV
 
