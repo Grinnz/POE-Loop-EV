@@ -1,5 +1,8 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
+0.06    2008-01-29 15:00:00
+        - Compat fixes for EV 3.0.
+
 0.05    2008-01-20 12:00:00
         - Epoll and Kqueue don't support polling on normal filehandles, so
           part2 of the ReadWrite test had to be disabled for these backends.

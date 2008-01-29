@@ -15,10 +15,10 @@ no_index:
 provides: 
   POE::Loop::EV: 
     file: lib/POE/Loop/EV.pm
-    version: 0.05
+    version: 0.06
 requires: 
-  EV: 2.01
+  EV: 3.0
   POE: 0.9999
   Test::More: 0.47
 tests: t/*.t t/*/*/*.t
-version: 0.05
+version: 0.06

@@ -1,11 +1,11 @@
 package POE::Loop::EV;
 
 # EV.pm (libev) event loop bridge
-# $Id: EV.pm 26 2008-01-20 16:21:48Z andyg $
+# $Id: EV.pm 27 2008-01-29 19:42:57Z andyg $
 
 use strict;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
@@ -57,7 +57,7 @@ sub loop_initialize {
     $_watcher_timer = EV::periodic_ns( 0, 0, 0, \&_loop_timer_callback );
     
     # Set up the callback for SIGCHLD
-    $_child_watcher = EV::child( 0, \&_child_callback );
+    $_child_watcher = EV::child( 0, 0, \&_child_callback );
     
     $EV::DIED = \&_die_handler;
 }
