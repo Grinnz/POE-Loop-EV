@@ -1,7 +1,5 @@
 package POE::Loop::EV_Tester_Poll;
 
-use parent 'POE::Loop::EV';
-
 =for poe_tests
 
 sub skip_tests {
