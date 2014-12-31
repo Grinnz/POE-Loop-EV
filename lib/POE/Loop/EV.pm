@@ -7,16 +7,6 @@ use strict;
 
 our $VERSION = '0.07';
 
-=for poe_tests
-
-sub skip_tests {
-    return "EV tests require the EV module" if (
-        do { eval "use EV"; $@ }
-    );
-}
-
-=cut
-
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
     POE::Kernel;
