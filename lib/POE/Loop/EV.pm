@@ -5,7 +5,7 @@ package POE::Loop::EV;
 
 use strict;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
@@ -108,7 +108,7 @@ sub loop_do_timeslice {
 sub loop_run {
     EV_DEBUG && warn "loop_run\n";
     
-    EV::loop();
+    EV::run();
     
     if ( defined $DIE_MESSAGE ) {
         my $message = $DIE_MESSAGE;
@@ -123,7 +123,7 @@ sub loop_halt {
     $_watcher_timer->stop();
     undef $_watcher_timer;
     
-    EV::unloop();
+    EV::break();
 }
 
 sub _die_handler {
@@ -133,9 +133,9 @@ sub _die_handler {
     # to stop the loop and get the error later
     $DIE_MESSAGE = $@;
     
-    # This will cause the EV::loop call in loop_run to return,
+    # This will cause the EV::run call in loop_run to return,
     # and cause the process to die.
-    EV::unloop();
+    EV::break();
 }
 
 ############################################################################
