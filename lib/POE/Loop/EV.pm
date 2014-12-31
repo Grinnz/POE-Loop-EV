@@ -7,6 +7,16 @@ use strict;
 
 our $VERSION = '0.07';
 
+=for poe_tests
+
+sub skip_tests {
+    return "EV tests require the EV module" if (
+        do { eval "use EV"; $@ }
+    );
+}
+
+=cut
+
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
     POE::Kernel;
@@ -211,7 +221,8 @@ sub _child_callback {
     # events for them.
     if ( exists $poe_kernel->[KR_PIDS]->{$pid} ) {
         my @sessions_to_clear;
-        while ( my ($ses_key, $ses_rec) = each %{ $poe_kernel->[KR_PIDS]->{$pid} } ) {
+        foreach my $ses_key ( keys %{ $poe_kernel->[KR_PIDS]->{$pid} } ) {
+            my $ses_rec = $poe_kernel->[KR_PIDS]->{$pid}{$ses_key};
             $poe_kernel->_data_ev_enqueue(
                 $ses_rec->[0], $poe_kernel, $ses_rec->[1], ET_SIGCLD,
                 [ 'CHLD', $pid, $status ],
