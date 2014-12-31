@@ -69,15 +69,10 @@ sub _loop_timer_callback {
     
     EV_DEBUG && warn "_loop_timer_callback, at " . time() . "\n";
 
-    if (TRACE_STATISTICS) {
-        $self->_data_stat_add('idle_seconds', time() - $last_time);
-    }
-
     $self->_data_ev_dispatch_due();
     $self->_test_if_kernel_is_idle();
 
     # Transferring control back to EV; this is idle time.
-    $last_time = time() if TRACE_STATISTICS;
 }
 
 sub loop_finalize {
