@@ -63,7 +63,6 @@ sub loop_initialize {
 }
 
 # Timer callback to dispatch events.
-my $last_time = time();
 sub _loop_timer_callback {
     my $self = $poe_kernel;
     
