@@ -4,8 +4,8 @@ name     'POE-Loop-EV';
 all_from 'lib/POE/Loop/EV.pm';
 
 requires 'Test::More' => '0.47';
-requires 'POE'        => '0.9999';
-requires 'EV'         => '3.0';
+requires 'POE'        => '1.310';
+requires 'EV'         => '4.0';
 
 ############# Copied from POE's Makefile.PL
 
