@@ -218,7 +218,7 @@ sub _child_callback {
                 [ 'CHLD', $pid, $status ],
                 __FILE__, __LINE__, undef, time(),
             );
-            push @sessions_to_clear, $ses_rec->[0];
+            push @sessions_to_clear, $ses_rec->[0]->ID;
         }
         $poe_kernel->_data_sig_pid_ignore($_, $pid) foreach @sessions_to_clear;
     }
