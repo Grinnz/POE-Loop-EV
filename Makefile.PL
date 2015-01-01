@@ -1,11 +1,15 @@
-use inc::Module::Install 0.65;
+use inc::Module::Install 1.14;
+
+use POE::Test::Loops;
 
 name     'POE-Loop-EV';
 all_from 'lib/POE/Loop/EV.pm';
 
-requires 'Test::More' => '0.47';
-requires 'POE'        => '1.310';
-requires 'EV'         => '4.0';
+configure_requires 'POE::Test::Loops' => '1.360';
+test_requires 'POE::Test::Loops'      => '1.360';
+test_requires 'Test::More'            => '0.47';
+requires 'POE'                        => '1.366';
+requires 'EV'                         => '4.0';
 
 ############# Copied from POE's Makefile.PL
 
@@ -36,6 +40,11 @@ if($ret =~ /^Y$/i) {
 print "\n";
 
 ############# End copied stuff
+
+POE::Test::Loops::generate( 't/30_loops', [ qw/
+    EV::Tester::Devpoll EV::Tester::Epoll EV::Tester::Kqueue
+    EV::Tester::Poll EV::Tester::Port EV::Tester::Select
+    / ], 0 );
 
 tests "t/*.t t/*/*/*.t";
 

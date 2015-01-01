@@ -4,10 +4,10 @@ NAME
 SYNOPSIS
         use EV;
         use POE;
-        
-    ...
-        
-    POE::Kernel->run();
+    
+        ...
+    
+        POE::Kernel->run();
 
 DESCRIPTION
     This class is an implementation of the abstract POE::Loop interface. It

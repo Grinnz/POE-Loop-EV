@@ -67,4 +67,3 @@
 ^POE-Loop-EV-
 \brun_network_tests$
 ^MANIFEST.SKIP$
-^gen_tests.sh$

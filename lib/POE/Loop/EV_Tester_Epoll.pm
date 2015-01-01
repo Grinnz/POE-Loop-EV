@@ -1,5 +1,7 @@
 package POE::Loop::EV_Tester_Epoll;
 
+our $VERSION = '0.07';
+
 =for poe_tests
 
 sub skip_tests {
