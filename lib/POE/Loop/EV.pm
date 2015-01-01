@@ -75,6 +75,8 @@ sub _loop_timer_callback {
 }
 
 sub loop_finalize {
+    my $self = shift;
+    
     EV_DEBUG && warn "loop_finalize\n";
     
     foreach my $fd ( 0 .. $#fileno_watcher ) {
@@ -88,7 +90,7 @@ sub loop_finalize {
         }
     }
     
-    loop_ignore_all_signals();
+    $self->loop_ignore_all_signals();
 }
 
 sub loop_attach_uidestroy {
@@ -186,13 +188,9 @@ sub loop_ignore_signal {
 sub loop_ignore_all_signals {
     my $self = shift;
 
-    map { $_->stop() if defined $_ } values %signal_events;
+    $self->loop_ignore_signal($_) foreach (keys %signal_events, 'CHLD');
     
     %signal_events = ();
-    
-    if ( $_child_watcher ) {
-        $_child_watcher->stop();
-    }
 }
 
 sub _child_callback {
