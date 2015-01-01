@@ -1,6 +1,10 @@
 use inc::Module::Install 1.14;
 
-use POE::Test::Loops;
+BEGIN {
+    require Module::AutoInstall;
+    Module::AutoInstall->install([], 'POE::Test::Loops' => '1.360');
+}
+use POE::Test::Loops 1.360;
 
 name     'POE-Loop-EV';
 all_from 'lib/POE/Loop/EV.pm';
