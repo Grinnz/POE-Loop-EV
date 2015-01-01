@@ -47,6 +47,7 @@ POE::Test::Loops::generate( 't/30_loops', [ qw/
     / ], 0 );
 
 tests "t/*.t t/*/*/*.t";
+clean_files 't/30_loops/*/* t/30_loops/*';
 
 # Rebuild README for maintainers
 if ( -e 'MANIFEST.SKIP' ) {
