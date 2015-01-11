@@ -25,24 +25,6 @@ provides:
   POE::Loop::EV:
     file: lib/POE/Loop/EV.pm
     version: '0.07'
-  POE::Loop::EV_Tester_Devpoll:
-    file: lib/POE/Loop/EV_Tester_Devpoll.pm
-    version: '0.07'
-  POE::Loop::EV_Tester_Epoll:
-    file: lib/POE/Loop/EV_Tester_Epoll.pm
-    version: '0.07'
-  POE::Loop::EV_Tester_Kqueue:
-    file: lib/POE/Loop/EV_Tester_Kqueue.pm
-    version: '0.07'
-  POE::Loop::EV_Tester_Poll:
-    file: lib/POE/Loop/EV_Tester_Poll.pm
-    version: '0.07'
-  POE::Loop::EV_Tester_Port:
-    file: lib/POE/Loop/EV_Tester_Port.pm
-    version: '0.07'
-  POE::Loop::EV_Tester_Select:
-    file: lib/POE/Loop/EV_Tester_Select.pm
-    version: '0.07'
 requires:
   EV: '4.0'
   POE: '1.366'
