@@ -5,5 +5,4 @@ sub skip_tests {
         do { eval "use EV"; $@ }
     );
     return "EV was not built with an epoll backend" if EV::backend() != 4;
-    return "Skipping test k_run_returns" if $_[0] eq 'k_run_returns';
 }

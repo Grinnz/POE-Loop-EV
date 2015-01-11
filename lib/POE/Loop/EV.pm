@@ -31,6 +31,8 @@ my %signal_events;
 # Global list of EV filehandle objects, indexed by fd number
 my @fileno_watcher;
 
+my $_async_watcher;
+
 my $DIE_MESSAGE;
 
 ############################################################################
@@ -58,6 +60,9 @@ sub loop_initialize {
     
     # Set up the callback for SIGCHLD
     $_child_watcher = EV::child( 0, 0, \&_child_callback );
+    
+    # Workaround so perl signals are handled
+    $_async_watcher = EV::check(sub { });
     
     $EV::DIED = \&_die_handler;
 }
@@ -91,6 +96,7 @@ sub loop_finalize {
     }
     
     $self->loop_ignore_all_signals();
+    undef $_async_watcher;
 }
 
 sub loop_attach_uidestroy {
