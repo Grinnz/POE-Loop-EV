@@ -5,4 +5,5 @@ sub skip_tests {
         do { eval "use EV"; $@ }
     );
     return "EV was not built with a poll backend" if EV::backend() != 2;
+    diag("Using EV with poll backend") if shift eq '00_info';
 }

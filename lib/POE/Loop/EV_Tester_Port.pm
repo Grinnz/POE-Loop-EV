@@ -5,4 +5,5 @@ sub skip_tests {
         do { eval "use EV"; $@ }
     );
     return "EV was not built with a port backend" if EV::backend() != 32;
+    diag("Using EV with port backend") if shift eq '00_info';
 }

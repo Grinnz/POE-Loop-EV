@@ -5,4 +5,5 @@ sub skip_tests {
         do { eval "use EV"; $@ }
     );
     return "EV was not built with a kqueue backend" if EV::backend() != 8;
+    diag("Using EV with kqueue backend") if shift eq '00_info';
 }

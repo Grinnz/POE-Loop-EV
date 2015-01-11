@@ -5,4 +5,5 @@ sub skip_tests {
         do { eval "use EV"; $@ }
     );
     return "EV was not built with an epoll backend" if EV::backend() != 4;
+    diag("Using EV with epoll backend") if shift eq '00_info';
 }
