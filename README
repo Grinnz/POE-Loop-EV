@@ -25,6 +25,9 @@ SEE ALSO
 AUTHOR
     Andy Grundman <andy@hybridized.org>
 
+CONTRIBUTORS
+    *   Dan Book <dbook@cpan.org>
+
 THANKS
     Brandon Black, for his POE::Loop::Event_Lib module.
 

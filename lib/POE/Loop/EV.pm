@@ -4,6 +4,7 @@ package POE::Loop::EV;
 # $Id: EV.pm 27 2008-01-29 19:42:57Z andyg $
 
 use strict;
+use POE::Loop::PerlSignals;
 
 our $VERSION = '0.07';
 
@@ -11,22 +12,13 @@ our $VERSION = '0.07';
 package # hide me from PAUSE
     POE::Kernel;
 
-use strict;
-
 use EV;
-use POE::Kernel;
 
 # Loop debugging
 sub EV_DEBUG () { $ENV{POE_EV_DEBUG} || 0 }
 
 # Global EV timer object
 my $_watcher_timer;
-
-# Global SIGCHLD watcher
-my $_child_watcher;
-
-# Global list of EV signal objects
-my %signal_events;
 
 # Global list of EV filehandle objects, indexed by fd number
 my @fileno_watcher;
@@ -57,9 +49,6 @@ sub loop_initialize {
 
     # Set up the global timer object
     $_watcher_timer = EV::periodic( 0, 0, 0, \&_loop_timer_callback );
-    
-    # Set up the callback for SIGCHLD
-    $_child_watcher = EV::child( 0, 0, \&_child_callback );
     
     # Workaround so perl signals are handled
     $_async_watcher = EV::check(sub { });
@@ -138,100 +127,6 @@ sub _die_handler {
     # This will cause the EV::run call in loop_run to return,
     # and cause the process to die.
     EV::break();
-}
-
-############################################################################
-# Signal Handling
-############################################################################
-
-sub loop_watch_signal {
-    my ( $self, $signame ) = @_;
-    
-    # Child process has stopped.
-    # XXX: libev always sets a SIGCHLD handler
-    if ( $signame eq 'CHLD' or $signame eq 'CLD' ) {
-        $_child_watcher->start();
-        
-        return;
-    }
-    
-    EV_DEBUG && warn "loop_watch_signal( $signame )\n";
-    
-    $signal_events{ $signame } ||= EV::signal(
-        $signame,
-        sub {
-            if ( TRACE_SIGNALS ) {
-                my $pipelike = $signame eq 'PIPE' ? 'PIPE-like' : 'generic';
-                POE::Kernel::_warn "<sg> Enqueuing $pipelike SIG$signame event";
-            }
-            
-            EV_DEBUG && warn "_loop_signal_callback( $signame )\n";
-            
-            $poe_kernel->_data_ev_enqueue(
-                $poe_kernel, $poe_kernel, EN_SIGNAL, ET_SIGNAL, [ $signame ],
-                __FILE__, __LINE__, undef, time()
-            );
-        },
-    );
-}
-
-sub loop_ignore_signal {
-    my ( $self, $signame ) = @_;
-
-    if ( $signame eq 'CHLD' or $signame eq 'CLD' ) {
-        if ( $_child_watcher ) {
-            $_child_watcher->stop();
-        }
-        
-        return;
-    }
-
-    if ( defined $signal_events{ $signame } ) {
-        $signal_events{ $signame }->stop();
-    }
-}
-
-sub loop_ignore_all_signals {
-    my $self = shift;
-
-    $self->loop_ignore_signal($_) foreach (keys %signal_events, 'CHLD');
-    
-    %signal_events = ();
-}
-
-sub _child_callback {
-    my $w = shift;
-    
-    my $pid    = $w->rpid;
-    my $status = $w->rstatus;
-    
-    EV_DEBUG && warn "_child_callback( $pid, $status )\n";
-    
-    if ( TRACE_SIGNALS ) {
-        POE::Kernel::_warn("<sg> POE::Kernel detected SIGCHLD (pid=$pid; exit=$status)");
-    }
-    
-    # Check for explicit SIGCHLD watchers, and enqueue explicit
-    # events for them.
-    if ( exists $poe_kernel->[KR_PIDS]->{$pid} ) {
-        my @sessions_to_clear;
-        foreach my $ses_key ( keys %{ $poe_kernel->[KR_PIDS]->{$pid} } ) {
-            my $ses_rec = $poe_kernel->[KR_PIDS]->{$pid}{$ses_key};
-            $poe_kernel->_data_ev_enqueue(
-                $ses_rec->[0], $poe_kernel, $ses_rec->[1], ET_SIGCLD,
-                [ 'CHLD', $pid, $status ],
-                __FILE__, __LINE__, undef, time(),
-            );
-            push @sessions_to_clear, $ses_rec->[0]->ID;
-        }
-        $poe_kernel->_data_sig_pid_ignore($_, $pid) foreach @sessions_to_clear;
-    }
-    
-    $poe_kernel->_data_ev_enqueue(
-        $poe_kernel, $poe_kernel, EN_SIGNAL, ET_SIGNAL,
-        [ 'CHLD', $pid, $status ],
-        __FILE__, __LINE__, undef, time()
-    );
 }
 
 ############################################################################
@@ -389,6 +284,16 @@ L<POE>, L<POE::Loop>, L<EV>
 =head1 AUTHOR
 
 Andy Grundman <andy@hybridized.org>
+
+=head1 CONTRIBUTORS
+
+=over
+
+=item *
+
+Dan Book <dbook@cpan.org>
+
+=back
 
 =head1 THANKS
 
