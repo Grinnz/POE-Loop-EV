@@ -56,7 +56,7 @@ sub loop_initialize {
     }
 
     # Set up the global timer object
-    $_watcher_timer = EV::periodic_ns( 0, 0, 0, \&_loop_timer_callback );
+    $_watcher_timer = EV::periodic( 0, 0, 0, \&_loop_timer_callback );
     
     # Set up the callback for SIGCHLD
     $_child_watcher = EV::child( 0, 0, \&_child_callback );
