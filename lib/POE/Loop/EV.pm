@@ -6,7 +6,7 @@ package POE::Loop::EV;
 use strict;
 use POE::Loop::PerlSignals;
 
-our $VERSION = '0.07';
+our $VERSION = '0.10';
 
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE

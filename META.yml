@@ -24,10 +24,10 @@ no_index:
 provides:
   POE::Loop::EV:
     file: lib/POE/Loop/EV.pm
-    version: '0.07'
+    version: '0.10'
 requires:
   EV: '4.0'
   POE: '1.366'
 resources:
   license: http://dev.perl.org/licenses/
-version: '0.07'
+version: '0.10'
