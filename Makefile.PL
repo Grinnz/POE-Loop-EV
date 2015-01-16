@@ -15,6 +15,8 @@ test_requires 'Test::More'            => '0.47';
 requires 'POE'                        => '1.366';
 requires 'EV'                         => '4.0';
 
+repository 'https://github.com/Grinnz/POE-Loop-EV';
+
 ############# Copied from POE's Makefile.PL
 
 # Should we skip the network tests?

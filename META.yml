@@ -30,4 +30,5 @@ requires:
   POE: '1.366'
 resources:
   license: http://dev.perl.org/licenses/
+  repository: https://github.com/Grinnz/POE-Loop-EV
 version: '0.10'
