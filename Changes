@@ -1,6 +1,6 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
-0.10    2015-01-11 01:35:00
+0.10    2015-01-16 10:15:00
         - Updated to support EV 4.0
         - Fixes to support recent versions of POE
         - Replaced test suite with generated tests from POE::Test::Loops
