@@ -47,7 +47,7 @@ print "\n";
 
 ############# End copied stuff
 
-POE::Test::Loops::generate( 't/30_loops', [ qw/
+POE::Test::Loops::generate( 't/30_loops', [ qw/EV
     EV::Tester::Devpoll EV::Tester::Epoll EV::Tester::Kqueue
     EV::Tester::Poll EV::Tester::Port EV::Tester::Select
     / ], 0 );

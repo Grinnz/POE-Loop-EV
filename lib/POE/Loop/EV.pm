@@ -8,6 +8,17 @@ use POE::Loop::PerlSignals;
 
 our $VERSION = '0.11';
 
+=for poe_tests
+sub skip_tests {
+    return "EV tests require the EV module" if (
+        do { eval "use EV"; $@ }
+    );
+    return "wheel_readwrite test disabled for kqueue"
+        if EV::backend() == EV::BACKEND_KQUEUE() && $_[0] eq 'wheel_readwrite';
+}
+
+=cut
+
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
     POE::Kernel;

@@ -1,7 +1,8 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
-0.11    2015-01-16 20:00:00
-        - Skip wheel_readwrite test again on kqueue (FreeBSD)
+0.11    2015-01-16 22:00:00
+        - Only require testing default EV backend
+        - Skip wheel_readwrite test again on kqueue (BSD)
 
 0.10    2015-01-16 10:15:00
         - Updated to support EV 4.0
