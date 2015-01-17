@@ -1,5 +1,8 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
+0.12    2015-01-17 14:00:00
+        - Fix typo in kqueue tests
+
 0.11    2015-01-16 22:00:00
         - Only require testing default EV backend
         - Skip wheel_readwrite test again on kqueue (BSD)
