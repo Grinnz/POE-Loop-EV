@@ -288,6 +288,9 @@ Certain EV backends do not support polling on normal filehandles, namely
 epoll and kqueue.  You should avoid using regular filehandles with select_read,
 select_write, ReadWrite, etc.
 
+See the L<libev documentation|http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#PORTABILITY_NOTES>
+for more information on portability issues with different EV backends.
+
 =head1 SEE ALSO
 
 L<POE>, L<POE::Loop>, L<EV>

@@ -19,6 +19,10 @@ CAVEATS
     epoll and kqueue. You should avoid using regular filehandles with
     select_read, select_write, ReadWrite, etc.
 
+    See the libev documentation
+    <http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#PORTABILITY_NOTES>
+    for more information on portability issues with different EV backends.
+
 SEE ALSO
     POE, POE::Loop, EV
 
