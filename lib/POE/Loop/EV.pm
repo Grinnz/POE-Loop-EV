@@ -6,7 +6,7 @@ package POE::Loop::EV;
 use strict;
 use POE::Loop::PerlSignals;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 =for poe_tests
 sub skip_tests {
