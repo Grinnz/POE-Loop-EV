@@ -7,4 +7,4 @@ perl:
   - "5.12"
   - "5.10"
   - "5.8"
-script: rm MANIFEST.SKIP && perl Makefile.PL --default && make test
+script: perl Makefile.PL --default && make test
