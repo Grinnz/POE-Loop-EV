@@ -1,6 +1,8 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
 {{$NEXT}}
+
+0.13      2015-08-18 15:21:14 EDT
         - Switch distribution tooling to Dist::Zilla
 
 0.12    2015-01-17 14:00:00
