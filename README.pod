@@ -1,0 +1,67 @@
+=pod
+
+=for poe_tests
+sub skip_tests {
+    return "EV tests require the EV module" if (
+        do { eval "use EV"; $@ }
+    );
+    return "wheel_readwrite test disabled for kqueue"
+        if EV::backend() == EV::BACKEND_KQUEUE() && $_[0] eq 'wheel_readwrite';
+}
+
+=head1 NAME
+
+POE::Loop::EV - a bridge that supports EV from POE
+
+=head1 SYNOPSIS
+
+    use EV;
+    use POE;
+    
+    ...
+    
+    POE::Kernel->run();
+
+=head1 DESCRIPTION
+
+This class is an implementation of the abstract POE::Loop interface.
+It follows POE::Loop's public interface exactly.  Therefore, please
+see L<POE::Loop> for its documentation.
+
+=head1 CAVEATS
+
+Certain EV backends do not support polling on normal filehandles, namely
+epoll and kqueue.  You should avoid using regular filehandles with select_read,
+select_write, ReadWrite, etc.
+
+See the L<libev documentation|http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#PORTABILITY_NOTES>
+for more information on portability issues with different EV backends.
+
+=head1 SEE ALSO
+
+L<POE>, L<POE::Loop>, L<EV>
+
+=head1 AUTHOR
+
+Andy Grundman <andy@hybridized.org>
+
+=head1 CONTRIBUTORS
+
+=over
+
+=item *
+
+Dan Book <dbook@cpan.org>
+
+=back
+
+=head1 THANKS
+
+Brandon Black, for his L<POE::Loop::Event_Lib> module.
+
+=head1 LICENSE
+
+POE::Loop::EV is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

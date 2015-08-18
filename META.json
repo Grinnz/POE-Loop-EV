@@ -1,0 +1,74 @@
+{
+   "abstract" : "a bridge that supports EV from POE",
+   "author" : [
+      "Andy Grundman <andy@hybridized.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 5.039, CPAN::Meta::Converter version 2.150005",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : 2
+   },
+   "name" : "POE-Loop-EV",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "inc",
+         "share",
+         "eg",
+         "examples"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0",
+            "POE::Test::Loops" : "1.360"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Dist::Zilla::Plugin::Test::Perl::Critic" : "0",
+            "Dist::Zilla::PluginBundle::Author::DBOOK" : "0.011",
+            "Test::Pod" : "1.41"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "EV" : "4.0",
+            "POE" : "1.366",
+            "perl" : "5.006"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "POE::Test::Loops" : "1.360",
+            "Test::More" : "0.47"
+         }
+      }
+   },
+   "provides" : {
+      "POE::Loop::EV" : {
+         "file" : "lib/POE/Loop/EV.pm",
+         "version" : "0.13"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "homepage" : "https://github.com/Grinnz/POE-Loop-EV",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/Grinnz/POE-Loop-EV.git",
+         "web" : "https://github.com/Grinnz/POE-Loop-EV"
+      }
+   },
+   "version" : "0.13",
+   "x_contributors" : [
+      "Dan Book <grinnz@grinnz.com>"
+   ]
+}
+

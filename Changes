@@ -1,5 +1,8 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
+{{$NEXT}}
+        - Switch distribution tooling to Dist::Zilla
+
 0.12    2015-01-17 14:00:00
         - Fix typo in kqueue tests
 
