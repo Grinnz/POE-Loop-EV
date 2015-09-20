@@ -7,4 +7,6 @@ perl:
   - "5.12"
   - "5.10"
   - "5.8"
+env:
+  - AUTOMATED_TESTING=1
 script: perl Makefile.PL --default && make test

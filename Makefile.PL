@@ -29,7 +29,7 @@ my %WriteMakefileArgs = (
     "POE::Test::Loops" => "1.360",
     "Test::More" => "0.47"
   },
-  "VERSION" => "0.13",
+  "VERSION" => "0.14",
   "test" => {
     "TESTS" => "t/*.t t/*/*/*.t"
   }
