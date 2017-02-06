@@ -3,6 +3,7 @@ package POE::Loop::EV;
 # EV.pm (libev) event loop bridge
 # $Id: EV.pm 27 2008-01-29 19:42:57Z andyg $
 
+use warnings;
 use strict;
 use POE::Loop::PerlSignals;
 
