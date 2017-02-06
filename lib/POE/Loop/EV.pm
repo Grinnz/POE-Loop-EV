@@ -9,6 +9,20 @@ use POE::Loop::PerlSignals;
 
 our $VERSION = '0.14';
 
+my %methods;
+sub _backend_name {
+    return undef unless defined( my $backend = shift );
+    %methods = (
+        EV::BACKEND_SELECT()  => 'select',
+        EV::BACKEND_POLL()    => 'poll',
+        EV::BACKEND_EPOLL()   => 'epoll',
+        EV::BACKEND_KQUEUE()  => 'kqueue',
+        EV::BACKEND_DEVPOLL() => 'devpoll',
+        EV::BACKEND_PORT()    => 'port',
+    ) unless keys %methods;
+    return $methods{ $backend };
+}
+
 =for poe_tests
 use EV;
 sub skip_tests {
@@ -45,16 +59,8 @@ sub loop_initialize {
     my $self = shift;
     
     if ( EV_DEBUG ) {
-        my $methods = {
-            EV::BACKEND_SELECT()  => 'select',
-            EV::BACKEND_POLL()    => 'poll',
-            EV::BACKEND_EPOLL()   => 'epoll',
-            EV::BACKEND_KQUEUE()  => 'kqueue',
-            EV::BACKEND_DEVPOLL() => 'devpoll',
-            EV::BACKEND_PORT()    => 'port',
-        };
-        
-        warn "loop_initialize, EV is using method: " . $methods->{ EV::backend() } . "\n";
+        my $method = POE::Loop::EV::_backend_name( EV::backend() );
+        warn "loop_initialize, EV is using method: $method\n";
     }
 
     # Set up the global timer object

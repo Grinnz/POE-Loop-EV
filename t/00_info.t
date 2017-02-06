@@ -1,18 +1,13 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
-use_ok('EV');
-use_ok('POE');
+use Test::More;
+use EV;
+use POE 'Loop::EV';
+
 is(POE::Kernel::poe_kernel_loop(), 'POE::Loop::EV', 'Using EV event loop for POE');
 
-my $methods = {
-    EV::BACKEND_SELECT()  => 'select',
-    EV::BACKEND_POLL()    => 'poll',
-    EV::BACKEND_EPOLL()   => 'epoll',
-    EV::BACKEND_KQUEUE()  => 'kqueue',
-    EV::BACKEND_DEVPOLL() => 'devpoll',
-    EV::BACKEND_PORT()    => 'port',
-};
+my $method = POE::Loop::EV::_backend_name( EV::backend() );
+diag("Using EV $EV::VERSION with default backend $method");
 
-diag("Using EV $EV::VERSION with default backend ".$methods->{ EV::backend() });
+done_testing;
