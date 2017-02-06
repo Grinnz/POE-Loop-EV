@@ -1,6 +1,8 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
 {{$NEXT}}
+        - Use warnings (lorn)
+        - Various testing improvements
 
 0.13      2015-08-18 15:21:14 EDT
         - Switch distribution tooling to Dist::Zilla

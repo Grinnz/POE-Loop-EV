@@ -6,6 +6,7 @@ package POE::Loop::EV;
 use warnings;
 use strict;
 use POE::Loop::PerlSignals;
+use EV;
 
 our $VERSION = '0.14';
 
@@ -37,8 +38,6 @@ sub skip_tests {
 # Everything plugs into POE::Kernel.
 package # hide me from PAUSE
     POE::Kernel;
-
-use EV;
 
 # Loop debugging
 sub EV_DEBUG () { $ENV{POE_EV_DEBUG} || 0 }

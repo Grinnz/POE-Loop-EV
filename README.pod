@@ -2,9 +2,11 @@
 
 =for poe_tests
 use EV;
+BEGIN { $ENV{POE_LOOP_USES_POLL} = 1 if EV::backend() == EV::BACKEND_POLL(); }
 sub skip_tests {
     return "wheel_readwrite test disabled for kqueue"
         if EV::backend() == EV::BACKEND_KQUEUE() && $_[0] eq 'wheel_readwrite';
+    return undef;
 }
 
 =head1 NAME
