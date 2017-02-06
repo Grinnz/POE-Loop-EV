@@ -9,4 +9,5 @@ sub skip_tests {
     return "EV was not built with an epoll backend"
         if EV::backend() != EV::BACKEND_EPOLL();
     diag("Using EV with epoll backend") if shift eq '00_info';
+    return undef;
 }

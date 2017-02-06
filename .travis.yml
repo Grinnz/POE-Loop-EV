@@ -11,4 +11,5 @@ perl:
   - "5.8"
 env:
   - AUTOMATED_TESTING=1
+before_install: cpanm --quiet --notest Curses IO::Pty Socket::GetAddrInfo Term::Size
 script: perl Makefile.PL --default && make test

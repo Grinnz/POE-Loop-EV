@@ -9,4 +9,5 @@ sub skip_tests {
     return "EV was not built with a port backend"
         if EV::backend() != EV::BACKEND_PORT();
     diag("Using EV with port backend") if shift eq '00_info';
+    return undef;
 }
