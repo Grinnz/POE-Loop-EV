@@ -26,7 +26,7 @@ sub _backend_name {
 
 =for poe_tests
 use EV;
-BEGIN { $ENV{POE_LOOP_USES_POLL} = 1 if EV::backend() == EV::BACKEND_POLL(); }
+BEGIN { $ENV{POE_EVENT_LOOP} = 'POE::Loop::EV'; $ENV{POE_LOOP_USES_POLL} = 1 if EV::backend() == EV::BACKEND_POLL(); }
 sub skip_tests {
     return "wheel_readwrite test disabled for kqueue"
         if EV::backend() == EV::BACKEND_KQUEUE() && $_[0] eq 'wheel_readwrite';
@@ -275,8 +275,7 @@ POE::Loop::EV - a bridge that supports EV from POE
 
 =head1 SYNOPSIS
 
-    use EV;
-    use POE;
+    use POE 'Loop::EV';
     
     ...
     
@@ -319,9 +318,11 @@ Dan Book <dbook@cpan.org>
 
 Brandon Black, for his L<POE::Loop::Event_Lib> module.
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-POE::Loop::EV is free software; you may redistribute it and/or modify it
-under the same terms as Perl itself.
+This software is copyright (c) 2007 by Andy Grundman.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

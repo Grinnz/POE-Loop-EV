@@ -1,5 +1,5 @@
 =for poe_tests
-BEGIN { $ENV{LIBEV_FLAGS} = 4; }
+BEGIN { $ENV{POE_EVENT_LOOP} = 'POE::Loop::EV'; $ENV{LIBEV_FLAGS} = 4; }
 sub skip_tests {
     return "Author and automated testing only"
         unless $ENV{AUTHOR_TESTING} or $ENV{AUTOMATED_TESTING};
