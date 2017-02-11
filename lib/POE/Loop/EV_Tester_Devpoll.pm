@@ -7,6 +7,6 @@ sub skip_tests {
         unless eval { require EV; 1 };
     return "EV was not built with a devpoll backend"
         if EV::backend() != EV::BACKEND_DEVPOLL();
-    diag("Using EV with devpoll backend") if shift eq '00_info';
+    diag("Using EV with devpoll backend") if $_[0] eq '00_info';
     return undef;
 }
