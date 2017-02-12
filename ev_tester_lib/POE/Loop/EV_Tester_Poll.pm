@@ -3,10 +3,10 @@ BEGIN { $ENV{POE_EVENT_LOOP} = 'POE::Loop::EV'; $ENV{LIBEV_FLAGS} = 2; $ENV{POE_
 sub skip_tests {
     return "Author and automated testing only"
         unless $ENV{AUTHOR_TESTING} or $ENV{AUTOMATED_TESTING};
-    return "EV module with poll backend could not be loaded: $@"
+    return "EV module with 'poll' backend could not be loaded: $@"
         unless eval { require EV; 1 };
-    return "EV was not built with a poll backend"
+    return "EV was not built with a 'poll' backend"
         if EV::backend() != EV::BACKEND_POLL();
-    diag("Using EV with poll backend") if $_[0] eq '00_info';
+    diag("Using EV backend 'poll'") if $_[0] eq '00_info';
     return undef;
 }

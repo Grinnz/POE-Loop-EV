@@ -28,8 +28,20 @@ sub _backend_name {
 use EV;
 BEGIN { $ENV{POE_EVENT_LOOP} = 'POE::Loop::EV'; $ENV{POE_LOOP_USES_POLL} = 1 if EV::backend() == EV::BACKEND_POLL(); }
 sub skip_tests {
-    return "wheel_readwrite test disabled for kqueue"
+    return "wheel_readwrite test disabled for 'kqueue'"
         if EV::backend() == EV::BACKEND_KQUEUE() && $_[0] eq 'wheel_readwrite';
+    if ($_[0] eq '00_info') {
+        my %methods = ( # duplicated for generated tests
+            EV::BACKEND_SELECT()  => 'select',
+            EV::BACKEND_POLL()    => 'poll',
+            EV::BACKEND_EPOLL()   => 'epoll',
+            EV::BACKEND_KQUEUE()  => 'kqueue',
+            EV::BACKEND_DEVPOLL() => 'devpoll',
+            EV::BACKEND_PORT()    => 'port',
+        );
+        my $method = $methods{ EV::backend() };
+        diag("Using default EV backend '$method'");
+    }
     return undef;
 }
 
