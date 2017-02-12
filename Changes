@@ -1,6 +1,8 @@
 # This file documents the revision history for Perl extension POE::Loop::EV.
 
 {{$NEXT}}
+
+0.14      2017-02-11 20:06:15 EST
         - Use warnings (lorn)
         - Various testing improvements
 
