@@ -21,20 +21,13 @@
          "share",
          "t",
          "xt"
-      ],
-      "file" : [
-         "lib/POE/Loop/EV_Tester_Devpoll.pm",
-         "lib/POE/Loop/EV_Tester_Epoll.pm",
-         "lib/POE/Loop/EV_Tester_Kqueue.pm",
-         "lib/POE/Loop/EV_Tester_Poll.pm",
-         "lib/POE/Loop/EV_Tester_Port.pm",
-         "lib/POE/Loop/EV_Tester_Select.pm"
       ]
    },
    "prereqs" : {
       "configure" : {
          "requires" : {
             "ExtUtils::MakeMaker" : "0",
+            "File::Spec" : "0",
             "POE::Test::Loops" : "1.360"
          }
       },

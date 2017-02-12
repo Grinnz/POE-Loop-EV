@@ -9,12 +9,18 @@ use 5.006;
 use ExtUtils::MakeMaker;
 
 use POE::Test::Loops 1.360;
+use File::Spec;
+BEGIN { # as in Dir::Self
+  my $dir = File::Spec->rel2abs(join '', (File::Spec->splitpath(__FILE__))[0, 1]);
+  unshift @INC, File::Spec->catdir($dir, 'ev_tester_lib');
+}
 
 my %WriteMakefileArgs = (
   "ABSTRACT" => "a bridge that supports EV from POE",
   "AUTHOR" => "Andy Grundman <andy\@hybridized.org>",
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => 0,
+    "File::Spec" => 0,
     "POE::Test::Loops" => "1.360"
   },
   "DISTNAME" => "POE-Loop-EV",
