@@ -10,10 +10,6 @@ use ExtUtils::MakeMaker;
 
 use POE::Test::Loops 1.360;
 use File::Spec;
-BEGIN { # as in Dir::Self
-  my $dir = File::Spec->rel2abs(join '', (File::Spec->splitpath(__FILE__))[0, 1]);
-  unshift @INC, File::Spec->catdir($dir, 'ev_tester_lib');
-}
 
 my %WriteMakefileArgs = (
   "ABSTRACT" => "a bridge that supports EV from POE",
@@ -107,5 +103,7 @@ unless ($ret =~ /^Y$/i) {
   open(TOUCH,"+>$marker") and close TOUCH;
 }
 print "\n";
+my $dir = File::Spec->rel2abs(join '', (File::Spec->splitpath(__FILE__))[0, 1]); # as in Dir::Self
+unshift @INC, File::Spec->catdir($dir, 'ev_tester_lib'); # for POE::Test::Loops to find
 POE::Test::Loops::generate('t/30_loops', [qw(EV EV::Tester::Devpoll EV::Tester::Epoll
   EV::Tester::Kqueue EV::Tester::Poll EV::Tester::Port EV::Tester::Select)], 0);
