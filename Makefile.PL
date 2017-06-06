@@ -31,9 +31,9 @@ my %WriteMakefileArgs = (
     "ExtUtils::MakeMaker" => 0,
     "File::Spec" => 0,
     "POE::Test::Loops" => "1.360",
-    "Test::More" => "0.47"
+    "Test::More" => "0.88"
   },
-  "VERSION" => "0.14",
+  "VERSION" => "0.15",
   "test" => {
     "TESTS" => "t/*.t t/*/*/*.t"
   }
@@ -50,7 +50,7 @@ my %FallbackPrereqs = (
   "File::Spec" => 0,
   "POE" => "1.366",
   "POE::Test::Loops" => "1.360",
-  "Test::More" => "0.47"
+  "Test::More" => "0.88"
 );
 
 unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
