@@ -8,7 +8,7 @@ use strict;
 use POE::Loop::PerlSignals;
 use EV;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 my %methods;
 sub _backend_name {
